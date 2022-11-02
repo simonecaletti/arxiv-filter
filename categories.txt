@@ -1,3 +1,3 @@
-cs.LG
-cs.RO
-cs.AI
+math-ph
+hep-th
+hep-lat

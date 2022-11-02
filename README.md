@@ -21,10 +21,10 @@ We use mailgun in order to send the arxiv filter digests.
 
 Create a free account at [mailgun](https://www.mailgun.com/). You get 10,000 emails per month for free. Do not enter any credit card information if asked for.
 
-Log in and click on "Domains" in the top menu. One sandbox will already exist, click on it, and do the following:
+Log in and click on "Sending" on the right menu then "Domains". One sandbox will already exist, click on it, and do the following:
 1. Copy the sandbox name into mailgun-sandbox-name.txt
 2. Copy the API key into mailgun-api-key.txt
-3. Click on "Manage Authorized Recipients" and add your email account. Also add your email account to mailgun-email-recipient.txt
+3. Add you email to "Authorized Recipients". Also add your email account to mailgun-email-recipient.txt
 
 Note: do not keep your mailgun sandbox or api key on github or any other publicly accessible place. Mailgun will notice it and disable your account.
 
@@ -42,12 +42,16 @@ $ sudo crontab -e
 ```
 and add the following line
 ```
-5 0 * * * /usr/bin/python2 /path/to/arxiv-filter/run.py
+mm hh * * * /usr/bin/python3 /path/to/arxiv-filter/run.py
+```
+e.g.
+```
+5 0 * * * /usr/bin/python3 /path/to/arxiv-filter/run.py
 ```
 which will run the script once a day at 12:05am.
 
 If you want to immediately test if the installation works, do
 ```
-$ /usr/bin/python2 /path/to/arxiv-filter/run.py
+$ /usr/bin/python3 /path/to/arxiv-filter/run.py
 ```
 (Note: arxiv filter searches over submissions from the past week and---after filtering---only emails you submissions that it has not sent you before. If you want to start from scratch, delete the file previous_arxivs.txt)

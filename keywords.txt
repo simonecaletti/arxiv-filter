@@ -1,4 +1,7 @@
-robot
-learning
-neural network
-Yann Lecun
+causal dynamical triangulations
+dynamical triangulations
+euclidean triangulations
+CDT
+DT
+JT Gravity
+Matrix Models

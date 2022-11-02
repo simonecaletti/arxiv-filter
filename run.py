@@ -8,15 +8,15 @@ import arxiv
 
 
 class Query(object):
-    def __init__(self, query):
-        self.date = datetime(*query['updated_parsed'][:6], tzinfo=timezone('GMT'))
-        self.url = query['arxiv_url']
-        self.title = query['title']
-        self.authors = ', '.join(query['authors'])
-        self.abstract = query['summary']
-        self.date_str = query['published']
-        self.id = 'v'.join(query['id'].split('v')[:-1])
-        self.categories = [tag['term'] for tag in query['tags']]
+    def __init__(self, result):
+        self.date = result.updated
+        self.url = result.entry_id
+        self.title = result.title
+        self.authors = ', '.join([author.name for author in result.authors])
+        self.abstract = result.summary
+        # self.date_str = query['published']
+        self.id = result.entry_id[result.entry_id.find("/v")+5:]
+        self.categories = result.categories
 
     @property
     def is_recent(self):
@@ -36,7 +36,7 @@ class Query(object):
         s += ', '.join(self.categories) + '\n'
         s += self.date.ctime() + ' GMT \n'
         s += '\n' + self.abstract + '\n'
-        return s.encode('utf-8')
+        return s
 
 class ArxivFilter(object):
     def __init__(self, categories, keywords, mailgun_sandbox_name, mailgun_api_key, mailgun_email_recipient):
@@ -67,16 +67,13 @@ class ArxivFilter(object):
     def _get_queries_from_last_day(self, max_results=10):
         queries = []
 
+        category_query_string = "OR ".join([f"cat:{category} " for category in self._categories]).strip()
+        keyword_query_string = "OR+".join([f"abs:\"{keyword}\" " for keyword in self._keywords]).strip()
+        query_string = f"({category_query_string}) AND ({keyword_query_string})"
         # get all queries in the categories in the last day
-        for category in self._categories:
-            num_category_added = 0
-            while True:
-                new_queries = [Query(q) for q in arxiv.query(search_query=category, sort_by='submittedDate', start=num_category_added, max_results=max_results)]
-                num_category_added += len(new_queries)
-                queries += [q for q in new_queries if q.is_recent]
-
-                if len(new_queries) == 0 or not new_queries[-1].is_recent:
-                    break
+        search = arxiv.Search(query=query_string, sort_by=arxiv.SortCriterion.SubmittedDate, max_results=max_results)
+        new_queries = [Query(result) for result in search.results()]
+        queries += [q for q in new_queries if q.is_recent]
 
         # get rid of duplicates
         queries_dict = {q.id: q for q in queries}
@@ -144,6 +141,3 @@ af = ArxivFilter(categories=categories,
                  mailgun_api_key=mailgun_api_key,
                  mailgun_email_recipient=mailgun_email_recipient)
 af.run()
-
-
-
