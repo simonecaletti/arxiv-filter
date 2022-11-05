@@ -135,6 +135,7 @@ with open(os.path.join(FILE_DIR, 'mailgun-email-recipient.txt'), 'r') as f:
     mailgun_email_recipient = f.read().strip()
 
 
+print(os.getenv("MAILGUN-API-KEY"))
 af = ArxivFilter(categories=categories,
                  keywords=keywords,
                  mailgun_sandbox_name=mailgun_sandbox_name,
