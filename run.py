@@ -70,7 +70,7 @@ class ArxivFilter(object):
         queries = []
 
         category_query_string = "OR ".join([f"cat:{category} " for category in self._categories]).strip()
-        keyword_query_string = "OR ".join([f"abs:\"{keyword}\" " for keyword in self._keywords]).strip()
+        keyword_query_string = "OR ".join([f"all:\"{keyword}\" " for keyword in self._keywords]).strip()
         query_string = f"({category_query_string}) AND ({keyword_query_string})"
         # get all queries in the categories in the last day
         search = arxiv.Search(query=query_string, sort_by=arxiv.SortCriterion.SubmittedDate, max_results=max_results)
