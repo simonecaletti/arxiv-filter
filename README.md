@@ -28,30 +28,22 @@ Log in and click on "Sending" on the right menu then "Domains". One sandbox will
 
 Note: do not keep your mailgun sandbox or api key on github or any other publicly accessible place. Mailgun will notice it and disable your account.
 
-#### Setup the script
+#### Setup the script locally
 
 Run the following to install the necessary python libraries:
 ```
-$ sudo pip install datetime pytz requests arxiv
+$ pip install datetime pytz requests arxiv python-dotenv
 ```
-You need to use sudo because the system python installation will be used.
+make a `.env` file in the same directory as `run.py` and add the following
+```
+MAILGUN-SANDBOX-NAME=<your sandbox name>
+MAILGUN-EMAIL-RECIPIENT=<you email address>
+MAILGUN-API-KEY=<you api key>
+```
+Run using 
+```
+$ python run.py
+```
+#### Seting up Heroku for scheduling
 
-Next, we want the script to be called once a day. Edit crontab by running
-```
-$ crontab -e
-```
-and add the following line
-```
-mm hh * * * /usr/bin/python3 /path/to/arxiv-filter/run.py
-```
-e.g.
-```
-5 0 * * * /usr/bin/python3 /path/to/arxiv-filter/run.py
-```
-which will run the script once a day at 12:05am.
-
-If you want to immediately test if the installation works, do
-```
-$ /usr/bin/python3 /path/to/arxiv-filter/run.py
-```
 (Note: arxiv filter searches over submissions from the past week and---after filtering---only emails you submissions that it has not sent you before. If you want to start from scratch, delete the file previous_arxivs.txt)
