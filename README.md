@@ -38,7 +38,7 @@ You need to use sudo because the system python installation will be used.
 
 Next, we want the script to be called once a day. Edit crontab by running
 ```
-$ sudo crontab -e
+$ crontab -e
 ```
 and add the following line
 ```
