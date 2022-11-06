@@ -2,4 +2,4 @@ datetime
 pytz
 requests
 arxiv
-dotenv
+python-dotenv
