@@ -125,17 +125,10 @@ with open(os.path.join(FILE_DIR, 'categories.txt'), 'r') as f:
 with open(os.path.join(FILE_DIR, 'keywords.txt'), 'r') as f:
     keywords = [line.strip() for line in f.read().split('\n') if len(line.strip()) > 0]
 
-with open(os.path.join(FILE_DIR, 'mailgun-sandbox-name.txt'), 'r') as f:
-    mailgun_sandbox_name = f.read().strip()
+mailgun_api_key = os.getenv("MAILGUN-API-KEY")
+mailgun_email_recipient = os.getenv("MAILGUN-EMAIL-RECIPIENT")
+mailgun_sandbox_name = os.getenv("MAILGUN-SANDBOX-NAME")
 
-with open(os.path.join(FILE_DIR, 'mailgun-api-key.txt'), 'r') as f:
-    mailgun_api_key = f.read().strip()
-
-with open(os.path.join(FILE_DIR, 'mailgun-email-recipient.txt'), 'r') as f:
-    mailgun_email_recipient = f.read().strip()
-
-
-print(os.getenv("MAILGUN-API-KEY"))
 af = ArxivFilter(categories=categories,
                  keywords=keywords,
                  mailgun_sandbox_name=mailgun_sandbox_name,
