@@ -5,7 +5,9 @@ from datetime import datetime
 from pytz import timezone
 import requests
 import arxiv
+from dotenv import load_dotenv
 
+load_dotenv()
 
 class Query(object):
     def __init__(self, result):
