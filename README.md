@@ -47,7 +47,6 @@ $ python run.py
 You can install a local cronjob in linux by running
 ```
 $ crontab -e
-
 ```
 and adding 
 ```
