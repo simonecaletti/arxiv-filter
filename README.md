@@ -44,7 +44,19 @@ Run using
 ```
 $ python run.py
 ```
-#### Setting up Heroku for scheduling
+You can install a local cronjob in linux by running
+```
+$ crontab -e
+
+```
+and adding 
+```
+0 7 * * * /path/to/python /path/to/arxiv-filter/run.py
+```
+which will run everyday at 7am as long as your machine is running.
+This has the downside of only running if your machine is up and running so I recommend setting this up for free on Heroku.
+
+#### Setting up Heroku for scheduling (recommended)
 1. Make an account with [Heroku](https://www.heroku.com).
 2. Create a new app and follow steps to deploy the code using the Heroku CLI.
 3. Click the "Resources" tab then the "find more add-ons" button and search for "Advanced Scheduler".
