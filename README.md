@@ -59,11 +59,12 @@ This has the downside of only running if your machine is up and running so I rec
 #### Setting up Heroku for scheduling (recommended)
 1. Make an account with [Heroku](https://www.heroku.com).
 2. Create a new app and follow steps to deploy the code using the Heroku CLI.
+3. Click the "Settings" tab and add the environment variables in `.env` to Config Vars. This is where the app running on Heroku will find the environment variables.
 3. Click the "Resources" tab then the "find more add-ons" button and search for "Advanced Scheduler".
-4. Go to the Overview tab and click on Advanced Scheduler then add a new trigger.
-5. add `python run.py` as the command
+4. Go to the "Overview" tab and click on "Advanced Scheduler" then add a new trigger.
+5. Add `python run.py` as the command
 6. Click Type - Recurring
 7. Click Schedule - Cron Expression
-8. add `0 7 * * *` which will trigger at 7am everyday.
+8. Add `0 7 * * *` which will trigger at 7am everyday.
 
 (Note: arxiv filter searches over submissions from the past week and---after filtering---only emails you submissions that it has not sent you before. If you want to start from scratch, delete the file previous_arxivs.txt)
