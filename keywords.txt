@@ -1,13 +1,7 @@
-causal dynamical triangulations
-dynamical triangulations
-euclidean triangulations
-CDT
-DT
-JT Gravity
-Matrix Models
+triangulations
+cdt
+dt
+jt gravity
+matrix model
 2d gravity
 liouville gravity
-jan ambjorn
-j. ambjorn
-renate loll
-r. loll
