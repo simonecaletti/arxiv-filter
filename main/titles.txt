@@ -1,0 +1,20 @@
+qcd
+jets
+jet
+parton shower
+quark
+gluon
+resummation
+thrust
+event shape
+angularity
+angularities
+jet shape
+strong coupling
+
+
+Gradient
+VQA
+optimization
+quantum annealing
+
