@@ -25,7 +25,7 @@ class Query(object):
         curr_time = datetime.now(timezone('GMT'))
         delta_time = curr_time - self.date
         assert delta_time.total_seconds() > 0
-        return delta_time.days < 8
+        return delta_time.days < 2
 
     def __hash__(self):
         return self.id
@@ -39,101 +39,75 @@ class Query(object):
         s += self.date.ctime() + ' GMT \n'
         s += '\n' + self.abstract + '\n'
         return s
+    
+    def printQuery(self):
+      print("============")
+      print(self.date)
+      print(self.url)
+      print("Title:", self.title)
+      print("Authors:", self.authors)
 
 class ArxivFilter(object):
-    def __init__(self, categories, keywords, mailgun_sandbox_name, mailgun_api_key, mailgun_email_recipient):
-        self._categories = categories
-        self._keywords = keywords
-        self._mailgun_sandbox_name = mailgun_sandbox_name
-        self._mailgun_api_key = mailgun_api_key
-        self._mailgun_email_recipient = mailgun_email_recipient
+  def __init__(self, categories, titles, authors):
+    self._categories = categories
+    self._titles = titles
+    self._authors = authors
 
-    @property
-    def _previous_arxivs_fname(self):
-        return os.path.join(os.path.dirname(os.path.realpath(__file__)), 'previous_arxivs.txt')
-        
-    def _get_previously_sent_arxivs(self):
-        if os.path.exists(self._previous_arxivs_fname):
-            with open(self._previous_arxivs_fname, 'r') as f:
-                return set(f.read().split('\n'))
-        else:
-            return set()
+  @property
+  def _get_previously_sent_arxivs(self, _prev_arxivs="prev_arxiv.txt"):
+      if os.path.exists(_prev_arxivs):
+          print("prev_arxiv.txt file does exist!")
+          with open(_prev_arxivs, 'r') as f:
+              return set(f.read().split('\n'))
+      else:
+          return set()
 
-    def _save_previously_sent_arxivs(self, new_queries):
-        prev_arxivs = list(self._get_previously_sent_arxivs())
-        prev_arxivs += [q.id for q in new_queries]
-        prev_arxivs = list(set(prev_arxivs))
-        with open(self._previous_arxivs_fname, 'w') as f:
-            f.write('\n'.join(prev_arxivs))
-        
-    def _get_queries_from_last_day(self, max_results=10):
-        queries = []
+  def _save_previously_sent_arxivs(self, _new_queries, _prev_arxivs=".prev_arxiv.txt"):
+      prev_arxivs = list(_get_previously_sent_arxivs(_prev_arxivs))
+      prev_arxivs += [q.id for q in _new_queries]
+      prev_arxivs = list(set(prev_arxivs))
+      with open(_prev_arxivs, 'w') as f:
+          f.write('\n'.join(prev_arxivs))
+
+  def _get_queries_from_last_day(self, max_results=100):
+        queries1 = []
+        queries2 = []
 
         category_query_string = "OR ".join([f"cat:{category} " for category in self._categories]).strip()
-        keyword_query_string = "OR ".join([f"all:\"{keyword}\" " for keyword in self._keywords]).strip()
-        query_string = f"({category_query_string}) AND ({keyword_query_string})"
-        # get all queries in the categories in the last day
-        search = arxiv.Search(query=query_string, sort_by=arxiv.SortCriterion.SubmittedDate, max_results=max_results)
-        new_queries = [Query(result) for result in search.results()]
-        queries += [q for q in new_queries if q.is_recent]
+        title_query_string = "OR ".join([f"ti:\"{title}\" " for title in self._titles]).strip()
+        auth_query_string = "OR ".join([f"au:\"{author}\" " for author in self._authors]).strip()
+        query_string1 = f"({category_query_string}) AND ({title_query_string})"
+        query_string2 = f"({category_query_string}) AND ({auth_query_string})"
+        #print("Query string 1: ", query_string1)
+        #print("Query string 2", query_string2)
 
-        # get rid of duplicates
+        # get all queries in the categories in the last day filtered by title keywords
+        search1 = arxiv.Search(query=query_string1, sort_by=arxiv.SortCriterion.SubmittedDate, max_results=max_results)
+        new_queries1 = [Query(result) for result in search1.results()]
+        queries1 += [q for q in new_queries1 if q.is_recent]
+
+        # get all queries in the categories in the last day filtered by author keywords
+        search2 = arxiv.Search(query=query_string2, sort_by=arxiv.SortCriterion.SubmittedDate, max_results=max_results)
+        new_queries2 = [Query(result) for result in search2.results()]
+        queries2 += [q for q in new_queries2 if q.is_recent]
+
+        # merge the two queries and get rid of duplicates
+        queries = queries1 + queries2
         queries_dict = {q.id: q for q in queries}
         unique_keys = set(queries_dict.keys())
-        queries = [queries_dict[k] for k in unique_keys]
-
-        # only keep queries that contain keywords
-        queries = [q for q in queries if max([k in str(q).lower() for k in self._keywords])]
+        unique_queries = [queries_dict[k] for k in unique_keys]
 
         # sort from most recent to least
-        queries = sorted(queries, key=lambda q: (datetime.now(timezone('GMT')) - q.date).total_seconds())
+        sorted_queries = sorted(unique_queries, key=lambda q: (datetime.now(timezone('GMT')) - q.date).total_seconds())
 
         # filter if previously sent
-        prev_arxivs = self._get_previously_sent_arxivs()
-        queries = [q for q in queries if q.id not in prev_arxivs]
-        self._save_previously_sent_arxivs(queries)
+        prev_arxivs = _get_previously_sent_arxivs()
+        prev_filtered_queries = [q for q in sorted_queries if q.id not in prev_arxivs]
+        _save_previously_sent_arxivs(prev_filtered_queries)
         
-        return queries
-
-    def _send_email(self, txt):
-        request = requests.post(
-                "https://api.mailgun.net/v3/{0}/messages".format(self._mailgun_sandbox_name),
-                auth=("api", self._mailgun_api_key),
-                data={"from": "arxivfilter@arxivfilter.com",
-                      "to": [self._mailgun_email_recipient],
-                      "subject": "ArxivFilter {0}".format(datetime.now(timezone('GMT')).ctime()),
-                      "text": txt})
-
-        print('Status: {0}'.format(request.status_code))
-        print('Body:   {0}'.format(request.text))
-
-    def run(self):
-        queries = self._get_queries_from_last_day()
-        queries_str = '\n-----------------------------\n'.join([str(q) for q in queries])
-        for keyword in self._keywords:
-            queries_str_insensitive = re.compile(re.escape(keyword), re.IGNORECASE)
-            queries_str = queries_str_insensitive.sub('**' + keyword + '**', queries_str)
-        queries_str = 'Categories: ' + ', '.join(self._categories) + '\n' + \
-                      'Keywords: ' + ', '.join(self._keywords) + '\n\n' + \
-                      '\n-----------------------------\n' + \
-                      queries_str
-        self._send_email(queries_str)
-
-FILE_DIR = os.path.dirname(os.path.realpath(__file__))
-
-with open(os.path.join(FILE_DIR, 'categories.txt'), 'r') as f:
-    categories = [line.strip() for line in f.read().split('\n') if len(line.strip()) > 0]
-
-with open(os.path.join(FILE_DIR, 'keywords.txt'), 'r') as f:
-    keywords = [line.strip() for line in f.read().split('\n') if len(line.strip()) > 0]
-
-mailgun_api_key = os.getenv("MAILGUN-API-KEY")
-mailgun_email_recipient = os.getenv("MAILGUN-EMAIL-RECIPIENT")
-mailgun_sandbox_name = os.getenv("MAILGUN-SANDBOX-NAME")
-
-af = ArxivFilter(categories=categories,
-                 keywords=keywords,
-                 mailgun_sandbox_name=mailgun_sandbox_name,
-                 mailgun_api_key=mailgun_api_key,
-                 mailgun_email_recipient=mailgun_email_recipient)
-af.run()
+        return prev_filtered_queries 
+    
+  def run(self):
+    queries = self._get_queries_from_last_day()
+    for q in queries:
+      printQuery(q)
