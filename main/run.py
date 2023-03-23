@@ -20,7 +20,6 @@ class Query(object):
         self.id = result.entry_id[result.entry_id.find("/v")+5:]
         self.categories = result.categories
 
-    @property
     def is_recent(self):
         curr_time = datetime.now(timezone('GMT'))
         delta_time = curr_time - self.date
@@ -53,7 +52,6 @@ class ArxivFilter(object):
     self._titles = titles
     self._authors = authors
 
-  @property
   def _get_previously_sent_arxivs(self, _prev_arxivs="prev_arxiv.txt"):
       if os.path.exists(_prev_arxivs):
           print("prev_arxiv.txt file does exist!")
@@ -63,7 +61,7 @@ class ArxivFilter(object):
           return set()
 
   def _save_previously_sent_arxivs(self, _new_queries, _prev_arxivs=".prev_arxiv.txt"):
-      prev_arxivs = list(_get_previously_sent_arxivs(_prev_arxivs))
+      prev_arxivs = list(self._get_previously_sent_arxivs(_prev_arxivs))
       prev_arxivs += [q.id for q in _new_queries]
       prev_arxivs = list(set(prev_arxivs))
       with open(_prev_arxivs, 'w') as f:
@@ -84,12 +82,12 @@ class ArxivFilter(object):
         # get all queries in the categories in the last day filtered by title keywords
         search1 = arxiv.Search(query=query_string1, sort_by=arxiv.SortCriterion.SubmittedDate, max_results=max_results)
         new_queries1 = [Query(result) for result in search1.results()]
-        queries1 += [q for q in new_queries1 if q.is_recent]
+        queries1 += [q for q in new_queries1 if q.is_recent()]
 
         # get all queries in the categories in the last day filtered by author keywords
         search2 = arxiv.Search(query=query_string2, sort_by=arxiv.SortCriterion.SubmittedDate, max_results=max_results)
         new_queries2 = [Query(result) for result in search2.results()]
-        queries2 += [q for q in new_queries2 if q.is_recent]
+        queries2 += [q for q in new_queries2 if q.is_recent()]
 
         # merge the two queries and get rid of duplicates
         queries = queries1 + queries2
@@ -101,16 +99,16 @@ class ArxivFilter(object):
         sorted_queries = sorted(unique_queries, key=lambda q: (datetime.now(timezone('GMT')) - q.date).total_seconds())
 
         # filter if previously sent
-        prev_arxivs = _get_previously_sent_arxivs()
+        prev_arxivs = self._get_previously_sent_arxivs()
         prev_filtered_queries = [q for q in sorted_queries if q.id not in prev_arxivs]
-        _save_previously_sent_arxivs(prev_filtered_queries)
+        self._save_previously_sent_arxivs(prev_filtered_queries)
         
         return prev_filtered_queries 
     
   def run(self):
     queries = self._get_queries_from_last_day()
     for q in queries:
-      printQuery(q)
+        q.printQuery()
 
 with open('categories.txt', 'r') as f:
   categories = [line.strip() for line in f.read().split('\n') if len(line.strip()) > 0]
