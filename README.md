@@ -11,22 +11,13 @@ You should install this on a machine that is always on and has internet access. 
 Arxiv filter works by finding all articles that
 1. Were submitted in the past day
 2. Are in one of the categories listed in categories.txt
-3. Have at least one of the keywords listed in keywords.txt in either the title, author list, or abstract
+3. Have in the title at least one of the keywords listed in titles.txt
+4. Have as an author at least one of the names listed in authors.txt
 
-You should change categories.txt and keywords.txt based on your interests. (Note: capitalization does not matter for keywords.)
+You should change categories.txt, titles.txt and authors.txt based on your interests. (Note: capitalization does not matter for titles and authors. Also second name only should work, although it doesn't distinguish between people with different first names.)
 
-#### Setup Mailgun
+### Setup yagmail
 
-We use mailgun in order to send the arxiv filter digests.
-
-Create a free account at [mailgun](https://www.mailgun.com/). You get 10,000 emails per month for free. Do not enter any credit card information if asked for.
-
-Log in and click on "Sending" on the right menu then "Domains". One sandbox will already exist, click on it, and do the following:
-1. Copy the sandbox name into mailgun-sandbox-name.txt
-2. Copy the API key into mailgun-api-key.txt
-3. Add you email to "Authorized Recipients". Also add your email account to mailgun-email-recipient.txt
-
-Note: do not keep your mailgun sandbox or api key on github or any other publicly accessible place. Mailgun will notice it and disable your account.
 
 #### Setup the script locally
 
