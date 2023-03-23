@@ -111,3 +111,17 @@ class ArxivFilter(object):
     queries = self._get_queries_from_last_day()
     for q in queries:
       printQuery(q)
+
+with open('categories.txt', 'r') as f:
+  categories = [line.strip() for line in f.read().split('\n') if len(line.strip()) > 0]
+
+with open('titles.txt', 'r') as f:
+  titles = [line.strip() for line in f.read().split('\n') if len(line.strip()) > 0]
+
+with open('authors.txt', 'r') as f:
+  authors = [line.strip() for line in f.read().split('\n') if len(line.strip()) > 0]
+
+af = ArxivFilter(categories=categories,
+                 titles=titles,
+                 authors=authors)
+af.run()
