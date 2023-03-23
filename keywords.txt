@@ -1,7 +1,0 @@
-triangulations
-cdt
-dt
-jt gravity
-matrix model
-2d gravity
-liouville gravity
