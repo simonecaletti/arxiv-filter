@@ -52,7 +52,7 @@ class ArxivFilter(object):
     self._titles = titles
     self._authors = authors
 
-  def _get_previously_sent_arxivs(self, _prev_arxivs="prev_arxiv.txt"):
+  def _get_previously_sent_arxivs(self, _prev_arxivs=".prev_arxiv.txt"):
       if os.path.exists(_prev_arxivs):
           print("prev_arxiv.txt file does exist!")
           with open(_prev_arxivs, 'r') as f:

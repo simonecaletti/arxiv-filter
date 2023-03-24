@@ -11,7 +11,7 @@ angularity
 angularities
 jet shape
 strong coupling
-
+dead cone
 
 Gradient
 VQA
