@@ -54,7 +54,7 @@ class ArxivFilter(object):
 
   def _get_previously_sent_arxivs(self, _prev_arxivs=".prev_arxiv.txt"):
       if os.path.exists(_prev_arxivs):
-          print("prev_arxiv.txt file does exist!")
+          # print("prev_arxiv.txt file does exist!")
           with open(_prev_arxivs, 'r') as f:
               return set(f.read().split('\n'))
       else:
