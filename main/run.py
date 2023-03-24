@@ -107,8 +107,11 @@ class ArxivFilter(object):
     
   def run(self):
     queries = self._get_queries_from_last_day()
-    for q in queries:
-        q.printQuery()
+    if queries == []:
+       print("No paper for today!")
+    else:
+      for q in queries:
+          q.printQuery()
 
 with open('categories.txt', 'r') as f:
   categories = [line.strip() for line in f.read().split('\n') if len(line.strip()) > 0]
